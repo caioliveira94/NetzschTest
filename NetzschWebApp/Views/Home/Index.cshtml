@@ -1,0 +1,48 @@
+﻿@model NetzschWebApp.Models.MessageViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<h1>Send Messages</h1>
+
+<div>
+    <label for="message">Message:</label>
+    <input type="text" id="message" name="message" />
+</div>
+<button id="send-message">Send</button>
+
+<h2>Received Messages:</h2>
+<ul id="consumed-messages">
+    @if(Model != null)
+        @foreach (var message in Model.ConsumedMessages)
+        {
+            <li>@message</li>
+        }
+</ul>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#send-message").click(function (event) {
+                event.preventDefault();
+
+                var message = $("#message").val();
+                if (message.trim() !== "") {
+                    $.post("@Url.Action("SendMessage", "Home")", { message: message });
+                    $("#message").val("");
+                }
+            });
+
+            function updateMessages() {
+                $.get("@Url.Action("GetMessages", "Home")", function (data) {
+                    var messageList = $("#consumed-messages");
+                    $.each(data, function (index, message) {
+                        messageList.append($("<li>").text(message));
+                    });
+                });
+            }
+
+            setInterval(updateMessages, 5000);
+        });
+    </script>
+}
